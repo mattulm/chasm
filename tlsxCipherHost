@@ -1,0 +1,29 @@
+#!/bin/sh
+## Tool :: tlsx
+## Description :: take results and scan for the tls version.
+## Global Variables
+d=$(date +"%Y%m%d")
+t=$(date +"%H%M")
+s=$2
+hosts=$1
+##
+## Create the files we need to run our scanner
+## We are going to use the output from the hosr command scanner
+cd /tmp; sleep 1; echo "";
+###########
+##
+for i in $(ls -Art /asm/output/host/host.*.csv | tail -n 5); do cat $i | grep -v ", ," >> /tmp/xxxx.cipher.all; done
+cat /tmp/xxxx.cipher.all | cut -f1 -d"," | tr [:upper:] [:lower:] | sort -u | grep -v hostname | grep -v domain | shuf -n 200 >> /tmp/xxxx.cipher.tmp
+sleep 1; echo "";
+echo "Here are our 200 hosts to scan";
+cat /tmp/xxxx.cipher.tmp; sleep 1; echo "";
+##
+##
+/asm/tools/tlsx -duc -silent -c 5 -timeout 3 -retry 2 -ce -j -o tlsx_cipher.host.$d.$t.$s.json -l /tmp/xxxx.cipher.tmp
+##
+## Let's clean up our mess now.
+mv tlsx_cipher.host.$d.$t.$s.json /asm/output/tlsx/
+rm -rf /tmp/xxxx.cipher.tmp; sleep 1; echo "";
+rm -rf /tmp/xxxx.cipher.all; sleep 1; echo "";
+## EOF
+##

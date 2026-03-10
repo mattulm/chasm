@@ -1,0 +1,33 @@
+#!/bin/sh
+## Tool :: httpx
+## Description :: Take our hosts with DNS record and scan with httpx
+## Global Variables
+d=$(date +"%Y%m%d")
+t=$(date +"%H%M")
+s=MSI
+hosts=/asm/targets/scope/MSIMasterHostList
+##
+##
+## Create the files we need to run our scanner
+## We are going to use the output from the httpx scanner
+cd /tmp; sleep 1; echo "";
+###########
+for i in $(ls -aln /asm/output/host/host.a.* | tail -n 4 | awk '{print $9}'); do 
+	cat $i | grep -v ", ," | cut -f1 -d"," >> /tmp/host.$d.$t.httpx.tmp
+done
+echo ""
+##
+##
+cat /tmp/host.$d.$t.httpx.tmp | sort -u >> /tmp/host.$d.$t.httpx.csv
+shuf -n 3000 /tmp/host.$d.$t.httpx.csv >> /tmp/httpx_msi_tmp 
+echo ""
+##
+##
+echo "Let's run our scan now."; sleep 1; echo "";
+/asm/tools/httpx -silent -duc -cname -favicon -asn -td -ip -l /tmp/httpx_msi_tmp -p http:80,443,8080,8443 -j -o httpx.http.$d.$t.$s.json
+mv httpx.http.$d.$t.$s.json /asm/output/httpx/
+rm -rf /tmp/host.$d.$t.tmp; sleep 1;
+rm -rf /tmp/httpx_msi_tmp; sleep 1;
+echo "Done";
+##
+## EOF

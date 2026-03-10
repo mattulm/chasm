@@ -1,0 +1,34 @@
+#!/bin/sh
+## Tool :: tlsx
+## Description :: take results and scan for the tls cert information.
+## Global Variables
+d=$(date +"%Y%m%d")
+t=$(date +"%H%M")
+s=$2
+hosts=$1
+##
+##
+cd /tmp; echo "";
+## Check our last 3 host list scan results first.
+echo "Check our last 3 host list scan results first.";
+for i in $(ls -Art /asm/output/host/host.a.*.csv | tail -n 5); do 
+	cat $i | grep -v ", ,"  >> /tmp/$s.cert.all; 
+done
+echo "";
+##
+##
+cat /tmp/$s.cert.all | grep -v ", ," | cut -f1 -d"," | tr [:upper:] [:lower:] | sort -u | grep -v hostname | shuf -n 20 >> /tmp/$s.cert.tmp
+echo ""; echo "Our host list is done.";
+##
+##
+echo ""; echo "Start our scan now"
+/asm/tools/tlsx -silent -duc -c 5  -timeout 3 -retry 2 -dns -ex -ss -mm -re -un -ve -j -o tlsx_cert.host.$d.$t.$s.json -l /tmp/$s.cert.tmp
+##
+## Let's clean up our mess now.
+echo ""; echo "Let's clean up our mess now.";
+mv tlsx_cert.host.$d.$t.$s.json /asm/output/tlsx/
+rm -rf /tmp/ipvc.cert.tmp; sleep 1; echo "";
+rm -rf /tmp/ipvc.cert.all; sleep 1; echo "";
+echo ""; echo "DONE";
+## EOF
+##
