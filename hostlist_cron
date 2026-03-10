@@ -1,0 +1,35 @@
+#!/bin/sh
+## Tool :: HOST
+## Description :: Look for the A records for a given host list
+## Global Variables
+d=$(date +"%Y%m%d")
+t=$(date +"%H%M")
+s=$2
+hosts=$1
+cd /tmp; sleep 1; echo "";
+## Tools
+## touch, echo, host, sleep, awk, grep, rm, mv, cat
+##
+echo "My job is to go through the master host list, and see which hostnames"
+echo "Have an actual IP Address assigned to them.  I tend to look for both"
+echo "versions of an IP address."; sleep 10;
+##
+##
+touch host.a.$d.$t.$s.csv;
+echo "hostname, ipVer4, ipVer6 " >> host.a.$d.$t.$s.csv;
+## Start our scanner
+##
+for i in $(shuf -n 5000 $hosts ); do
+	## Variables
+	ipVer4=0; ipVer6=0;
+	host $i >> host.tmp;
+	ipVer4=$(cat host.tmp | grep -m 1 "has address" | awk '{print $4 }');
+	ipVer6=$(cat host.tmp | grep -m 1 "has IPv" | awk '{print $5 }')
+	echo "$i, $ipVer4, $ipVer6 " >> host.a.$d.$t.$s.csv
+	echo $i, $ipVer4, $ipVer6;
+	## Clean up
+	rm -rf host.tmp;
+done
+mv host.a.$d.$t.$s.csv /asm/output/host/;
+##
+## EOF
