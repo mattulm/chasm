@@ -1,0 +1,32 @@
+#!/bin/sh
+## Tool :: cdncheck
+## Description :: take results and scan for the CDN information.
+## Global Variables
+d=$(date +"%Y%m%d")
+t=$(date +"%H%M")
+s=$2
+hosts=$1
+##
+##
+## Create the files we need to run our scanner
+## We are going to use the output from the httpx scanner
+cd /tmp; sleep 1; echo "";
+###########
+##
+##
+for i in $(ls -aln /asm/output/host/host.a.* | tail -n 4 | awk '{print $9}'); do 
+	cat $i | grep -v ", ," | cut -f1 -d"," >> /tmp/host.$d.$t.cdnchk.tmp
+done
+echo ""
+
+
+for i in $(shuf -n 500 /tmp/host.$d.$t.cdnchk.tmp ); do
+	echo $i:
+	/asm/tools/cdncheck -v -resp -retry 2 -silent -duc -j -o $i.json -i $i	
+	echo "Checking on the WAF implenetation for the following Host :: $i ";
+	cat $i.json | jq >> cdncheck.cdnc.$d.$t.$s.json;
+	rm -rf $i.json;
+done 
+mv cdncheck.cdnc.$d.$t.$s.json /asm/output/cdncheck/
+## EOF
+##
