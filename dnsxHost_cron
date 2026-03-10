@@ -1,0 +1,15 @@
+#!/bin/sh
+## Tool :: dnsx
+## Description :: Look for the A records for a given host list
+## Global Variables
+d=$(date +"%Y%m%d")
+t=$(date +"%H%M")
+s=$2
+hosts=$1
+##
+##
+cd /tmp;
+/asm/tools/dnsx -t 10 -r 1.1.1.1,9.9.9.9,208.67.222.222 -duc -silent -asn -cdn -l $hosts -j -o dnsx.a.$d.$t.$s.json
+mv dnsx.a.$d.$t.$s.json /asm/output/dnsx/
+##
+##
